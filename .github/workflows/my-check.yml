@@ -25,6 +25,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Clean install, run tests, run eslint
+      - name: Clean install
+        run: npm ci
+
+      - name: Lint
         run: npx eslint .
