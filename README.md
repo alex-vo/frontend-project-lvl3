@@ -1,15 +1,8 @@
-# 🚀 Welcome to your new awesome project!
+### Hexlet tests and linter status:
+[![Actions Status](https://github.com/alex-vo/frontend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/alex-vo/frontend-project-lvl3/actions)
 
-This project has been created using **webpack-cli**, you can now run
+[![tests and eslint](https://github.com/alex-vo/frontend-project-lvl3/actions/workflows/my-check.yml/badge.svg)](https://github.com/alex-vo/frontend-project-lvl3/actions/workflows/my-check.yml)
 
-```
-npm run build
-```
+[![Maintainability](https://api.codeclimate.com/v1/badges/7830a821180b30542f74/maintainability)](https://codeclimate.com/github/alex-vo/frontend-project-lvl3/maintainability)
 
-or
-
-```
-yarn build
-```
-
-to bundle your application
+[Check out https://frontend-project-lvl3-94f4xri5a-alex-vo.vercel.app](https://frontend-project-lvl3-94f4xri5a-alex-vo.vercel.app/)
