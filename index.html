@@ -4,17 +4,37 @@
   <meta charset="utf-8"/>
   <title>Webpack App</title>
 </head>
-<body>
+<body style="background-color: #484848;">
 <div class="container">
-  <form>
-    <div class="form-group">
-      <label for="bla">Name</label>
-      <input type="text" class="form-control" id="bla" aria-describedby="blaHelp"
-             placeholder="Bla">
-      <small id="blaHelp" class="form-text text-muted">We'll never walk alone.</small>
+  <div class="row">
+    <form>
+      <div class="form-group">
+        <label for="rss">RSS</label>
+        <input type="text" name="rss" class="form-control" id="rss" aria-describedby="blaHelp"
+               placeholder="https://www.ss.lv/lv/transport/cars/rss/">
+        <div class=""></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+  <div class="row">
+    <div class="col-8">
+      <div class="card border-0" style="background-color: #484848;">
+        <div class="card-body"><h2 class="card-title h4">Посты</h2></div>
+        <ul id="posts" class="list-group border-0 rounded-0">
+
+        </ul>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
+    <div class="col-4">
+      <div class="card border-0" style="background-color: #484848;">
+        <div class="card-body"><h2 class="card-title h4">Фиды</h2></div>
+        <ul id="feeds" class="list-group border-0 rounded-0">
+
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 
