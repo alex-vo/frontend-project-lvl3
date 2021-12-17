@@ -3,13 +3,18 @@ import { ValidationError } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
 import initDictionary from './dictionary';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min';
 
-export default () => {
+export default (document) => {
+  if (!document || !document.body || !document.body.innerHTML) {
+    return;
+  }
+
   const schema = yup.object().shape({
     rss: yup.string().url('must-be-valid-url').required('required-field'),
   });
 
-  // eslint-disable-next-line no-undef
   const form = document.querySelector('form');
 
   const formFields = {};
@@ -53,7 +58,6 @@ export default () => {
   };
 
   const htmlToElement = (html) => {
-    // eslint-disable-next-line no-undef
     const template = document.createElement('template');
     template.innerHTML = html.trim();
     return template.content.firstChild;
@@ -64,7 +68,6 @@ export default () => {
       return Promise.resolve();
     }
     const postsToShow = state.posts.filter((p) => !p.shown);
-    // eslint-disable-next-line no-undef
     const postList = document.querySelector('#posts');
     for (const post of postsToShow) {
       const postElement = htmlToElement(`
@@ -111,7 +114,6 @@ export default () => {
   };
 
   const renderFeeds = () => {
-    // eslint-disable-next-line no-undef
     const feedList = document.querySelector('#feeds');
     const feedsToShow = state.feeds.filter((f) => !f.shown);
     for (const feed of feedsToShow) {
@@ -126,7 +128,6 @@ export default () => {
   const addFeed = (id, url) =>
     axios.get(`https://hexlet-allorigins.herokuapp.com/raw?disableCache=true&url=${url}`)
       .then((res) => {
-        // eslint-disable-next-line no-undef
         const doc = new DOMParser().parseFromString(res.data, 'application/xml');
         const docTitle = doc.querySelector('channel>title').textContent;
         const docDescription = doc.querySelector('channel>description').textContent;
@@ -202,10 +203,8 @@ export default () => {
   initDictionary();
   checkFeeds();
 
-  // eslint-disable-next-line no-undef
   document.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault();
-    // eslint-disable-next-line no-undef
     const fd = new FormData(e.target);
     handle({ rss: fd.get('rss') });
   });
