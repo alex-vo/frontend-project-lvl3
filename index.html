@@ -8,13 +8,13 @@
 <div class="container">
   <div class="row">
     <form>
-      <div class="form-group">
-        <label for="rss">RSS</label>
-        <input type="text" name="rss" class="form-control" id="rss" aria-describedby="blaHelp"
-               placeholder="https://www.ss.lv/lv/transport/cars/rss/">
+      <div class="form-floating">
+        <input id="url-input" name="url" aria-label="url" class="form-control"
+               autocomplete="off" role="textbox">
         <div class=""></div>
+        <label for="url-input">Ссылка RSS</label>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button class="btn btn-primary" role="button" name="add">add</button>
     </form>
   </div>
   <div class="row">

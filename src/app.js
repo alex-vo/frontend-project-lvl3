@@ -3,19 +3,14 @@ import { ValidationError } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
 import initDictionary from './dictionary';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min';
 
-export default (document) => {
-  if (!document || !document.body || !document.body.innerHTML) {
-    return;
-  }
-
+export default () => {
   const schema = yup.object().shape({
-    rss: yup.string().url('must-be-valid-url').required('required-field'),
+    url: yup.string().url('must-be-valid-url').required('required-field'),
   });
 
   const form = document.querySelector('form');
+  const addButton = document.querySelector('button[name="add"]');
 
   const formFields = {};
 
@@ -67,18 +62,18 @@ export default (document) => {
     if (state.popupOpen) {
       return Promise.resolve();
     }
-    const postsToShow = state.posts.filter((p) => !p.shown);
     const postList = document.querySelector('#posts');
-    for (const post of postsToShow) {
-      const postElement = htmlToElement(`
+    state.posts.filter((p) => !p.shown)
+      .map((post) => {
+        const postElement = htmlToElement(`
         <li style="background-color: #484848;" class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0">
         </li>`);
-      const link = htmlToElement(`<a href="${post.link}" id="bla${post.guid}Link" class="fw-bold" data-id="2" target="_blank" rel="noopener noreferrer">${post.title}</a>`);
-      link.addEventListener('click', () => {
-        link.classList.remove('fw-bold');
-        link.classList.add('fw-normal');
-      });
-      const modal = htmlToElement(`
+        const link = htmlToElement(`<a href="${post.link}" id="bla${post.guid}Link" class="fw-bold" data-id="2" target="_blank" rel="noopener noreferrer">${post.title}</a>`);
+        link.addEventListener('click', () => {
+          link.classList.remove('fw-bold');
+          link.classList.add('fw-normal');
+        });
+        const modal = htmlToElement(`
       <div class="modal fade ${post.guid}" id="bla${post.guid}" tabindex="-1" aria-labelledby="bla${post.guid}Label" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -97,64 +92,74 @@ export default (document) => {
         </div>
       </div>
     `.trim());
-      modal.addEventListener('show.bs.modal', () => {
-        link.classList.remove('fw-bold');
-        link.classList.add('fw-normal');
-      });
-      postElement.append(
-        link,
-        htmlToElement(`<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bla${post.guid}">${i18next.t('view')}</button>`),
-        modal,
-      );
-      postList.prepend(postElement);
-      post.shown = true;
-    }
+        const viewButton = htmlToElement(`<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bla${post.guid}">${i18next.t('view')}</button>`);
+        viewButton.addEventListener('click', () => {
+          link.classList.remove('fw-bold');
+          link.classList.add('fw-normal');
+        });
+        postElement.append(
+          link,
+          viewButton,
+          modal,
+        );
+        post.shown = true;
+        return postElement;
+      })
+      .forEach((postElement) => postList.prepend(postElement));
 
     return Promise.resolve();
   };
 
   const renderFeeds = () => {
     const feedList = document.querySelector('#feeds');
-    const feedsToShow = state.feeds.filter((f) => !f.shown);
-    for (const feed of feedsToShow) {
-      const feedElement = htmlToElement(`<li style="background-color: #484848;" class="list-group-item border-0 border-end-0"><h3 class="h6 m-0">${feed.title}</h3>
+    state.feeds.filter((f) => !f.shown)
+      .forEach((feed) => {
+        const feedElement = htmlToElement(`<li style="background-color: #484848;" class="list-group-item border-0 border-end-0"><h3 class="h6 m-0">${feed.title}</h3>
             <p class="m-0 small text-black-50">${feed.description}</p></li>`);
-      feedList.prepend(feedElement);
-      feed.shown = true;
-    }
+        feedList.prepend(feedElement);
+        feed.shown = true;
+      });
     return Promise.resolve();
   };
 
-  const addFeed = (id, url) =>
-    axios.get(`https://hexlet-allorigins.herokuapp.com/raw?disableCache=true&url=${url}`)
-      .then((res) => {
-        const doc = new DOMParser().parseFromString(res.data, 'application/xml');
-        const docTitle = doc.querySelector('channel>title').textContent;
-        const docDescription = doc.querySelector('channel>description').textContent;
-        if (state.feeds.findIndex((feed) => feed.title === docTitle
-          && feed.description === docDescription) < 0) {
-          state.feeds.unshift({
-            id,
-            title: docTitle,
-            description: docDescription,
-            shown: false,
-          });
+  const addFeed = (id, url) => axios.get(`https://hexlet-allorigins.herokuapp.com/get?disableCache=true&url=${encodeURIComponent(url)}`)
+    .then((response) => {
+      if (response.status === 200) {
+        return response.data;
+      }
+      throw new ValidationError('network-error');
+    })
+    .catch(() => {
+      throw new ValidationError('network-error');
+    })
+    .then((res) => {
+      const doc = new DOMParser().parseFromString(res.contents, 'application/xml');
+      const docTitle = doc.querySelector('channel>title').textContent;
+      const docDescription = doc.querySelector('channel>description').textContent;
+      if (state.feeds.findIndex((feed) => feed.title === docTitle
+        && feed.description === docDescription) < 0) {
+        state.feeds.unshift({
+          id,
+          title: docTitle,
+          description: docDescription,
+          shown: false,
+        });
+      }
+      doc.querySelectorAll('item').forEach((item) => {
+        const itemGuid = item.querySelector('guid').textContent;
+        if (state.posts.findIndex((post) => post.guid === itemGuid) >= 0) {
+          return;
         }
-        doc.querySelectorAll('item').forEach((item) => {
-          const itemGuid = item.querySelector('guid').textContent;
-          if (state.posts.findIndex((post) => post.guid === itemGuid) >= 0) {
-            return;
-          }
-          state.posts.unshift({
-            feedId: id,
-            guid: item.querySelector('guid').textContent,
-            title: item.querySelector('title').textContent,
-            link: item.querySelector('link').textContent,
-            description: item.querySelector('description').textContent,
-            shown: false,
-          });
+        state.posts.unshift({
+          feedId: id,
+          guid: item.querySelector('guid').textContent,
+          title: item.querySelector('title').textContent,
+          link: item.querySelector('link').textContent,
+          description: item.querySelector('description').textContent,
+          shown: false,
         });
       });
+    });
 
   const checkFeeds = () => {
     setTimeout(() => {
@@ -163,39 +168,54 @@ export default (document) => {
     }, 5000);
   };
 
+  const toggleInputs = (disabled) => {
+    Object.keys(formFields)
+      .forEach((input) => {
+        formFields[input].input.readOnly = disabled;
+      });
+    addButton.disabled = disabled;
+  };
+
   const handle = (submittedForm) => {
-    for (const input of Object.keys(formFields)) {
-      formFields[input].input.classList.remove('is-invalid');
-    }
+    toggleInputs(true);
+    Object.keys(formFields)
+      .forEach((input) => {
+        formFields[input].input.classList.remove('is-invalid');
+      });
 
     let feedId = null;
     schema.validate(submittedForm)
-      .then(({ rss }) => {
-        if (state.feedUrls.findIndex((feed) => feed.url === rss) >= 0) {
+      .then(({ url }) => {
+        if (state.feedUrls.findIndex((feed) => feed.url === url) >= 0) {
           throw new ValidationError('rss-duplicate');
         } else {
           feedIdSequence += 1;
           feedId = feedIdSequence;
-          return addFeed(feedId, rss)
-            .then(() => rss);
+          return addFeed(feedId, url)
+            .then(() => url);
         }
       })
-      .then((rss) => {
-        state.feedUrls.push({ id: feedId, url: rss });
+      .then((url) => {
+        state.feedUrls.push({ id: feedId, url });
         form.reset();
-        showSuccess('rss', i18next.t('rss-successfully-added'));
         return Promise.all([renderFeeds(), renderPosts()]);
       })
+      .then(() => {
+        toggleInputs(false);
+        showSuccess('url', i18next.t('rss-successfully-added'));
+      })
       .catch((error) => {
+        console.log(error);
+        toggleInputs(false);
         if (feedId !== null) {
           state.feeds = state.feeds.filter((feed) => feed.id !== feedId);
           state.posts = state.posts.filter((post) => post.feedId !== feedId);
         }
         if (error instanceof ValidationError) {
           const errorMessage = error.errors.map((e) => i18next.t(e)).join(', ');
-          showError('rss', errorMessage);
+          showError('url', errorMessage);
         } else {
-          showError('rss', i18next.t('invalid-rss'));
+          showError('url', i18next.t('invalid-rss'));
         }
       });
   };
@@ -203,9 +223,9 @@ export default (document) => {
   initDictionary();
   checkFeeds();
 
-  document.querySelector('form').addEventListener('submit', (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    handle({ rss: fd.get('rss') });
+    handle({ url: fd.get('url') });
   });
 };

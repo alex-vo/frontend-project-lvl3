@@ -4,7 +4,7 @@
   "description": "RSS aggregator",
   "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx jest",
     "build": "webpack --mode=production --node-env=production",
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
@@ -21,10 +21,10 @@
     "url": "https://github.com/alex-vo/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/alex-vo/frontend-project-lvl3#readme",
+  "jest": {
+    "testEnvironment": "jsdom"
+  },
   "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.4",
-    "babel-loader": "^8.2.3",
     "css-loader": "^6.5.1",
     "eslint": "^8.4.1",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -36,7 +36,6 @@
     "webpack-dev-server": "^4.6.0"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.0",
     "axios": "^0.24.0",
     "bootstrap": "^5.1.3",
     "i18next": "^21.6.0",

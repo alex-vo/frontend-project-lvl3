@@ -11,6 +11,7 @@ export default () => {
           'must-be-valid-url': 'Ссылка должна быть валидным URL',
           'required-field': 'Не должно быть пустым',
           'invalid-rss': 'Ресурс не содержит валидный RSS',
+          'network-error': 'Ошибка сети',
           view: 'Просмотр',
         },
       },
